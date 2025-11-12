@@ -1,0 +1,58 @@
+[
+  {
+    "id": 1,
+    "gender_id": 1,
+    "sale": false,
+    "name": "Air Zoom Alpha",
+    "price": 129.9,
+    "image": "/2.png"
+  },
+  {
+    "id": 2,
+    "gender_id": 1,
+    "sale": true,
+    "name": "Pegasus Pro",
+    "price": 99.9,
+    "image": "/5.png"
+  },
+  {
+    "id": 3,
+    "gender_id": 2,
+    "sale": false,
+    "name": "React Breeze",
+    "price": 139,
+    "image": "/3.png"
+  },
+  {
+    "id": 4,
+    "gender_id": 2,
+    "sale": true,
+    "name": "Air Max Sky",
+    "price": 119,
+    "image": "/6.png"
+  },
+  {
+    "id": 5,
+    "gender_id": 3,
+    "sale": false,
+    "name": "Junior Runner",
+    "price": 79.9,
+    "image": "/4.png"
+  },
+  {
+    "id": 6,
+    "gender_id": 3,
+    "sale": 1,
+    "name": "Play Sprint",
+    "price": 69.9,
+    "image": "/7.png"
+  },
+  {
+    "id": 7,
+    "name": "test",
+    "price": 89,
+    "gender_id": 1,
+    "sale": 1,
+    "image": "/public/1.png"
+  }
+]

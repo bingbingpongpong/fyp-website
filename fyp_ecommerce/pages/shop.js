@@ -1,28 +1,33 @@
-// pages/men.js
+// pages/shop.js
+import Head from 'next/head';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 import ProductGrid from '../components/ProductGrid';
-
-export default function Men({ products }) {
-  return (
-    <>
-      <Navigation />
-      <ProductGrid title="Men's Collection" products={products} />
-      <Footer />
-    </>
-  );
-}
 
 export async function getServerSideProps(context) {
   const protocol = context.req.headers['x-forwarded-proto'] || 'http';
   const host = context.req.headers.host;
   try {
-    const res = await fetch(`${protocol}://${host}/api/products?gender=1`);
+    const res = await fetch(`${protocol}://${host}/api/products`);
     if (!res.ok) throw new Error('Failed to fetch products');
     const products = await res.json();
     return { props: { products: Array.isArray(products) ? products : [] } };
   } catch (error) {
-    console.error('Men page fetch error:', error);
+    console.error('Shop page error:', error);
     return { props: { products: [] } };
   }
 }
+
+export default function Shop({ products }) {
+  return (
+    <>
+      <Head>
+        <title>Shop All Products | GreenFactory</title>
+      </Head>
+      <Navigation />
+      <ProductGrid title="Shop All Products" products={products} />
+      <Footer />
+    </>
+  );
+}
+
