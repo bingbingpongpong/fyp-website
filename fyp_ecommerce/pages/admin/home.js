@@ -19,6 +19,8 @@ export default function AdminHome() {
   });
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [searchHistory, setSearchHistory] = useState([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
   // Client-side auth guard
   useEffect(() => {
@@ -28,7 +30,21 @@ export default function AdminHome() {
       return;
     }
     fetchProducts();
+    fetchSearchHistory();
   }, []);
+
+  async function fetchSearchHistory() {
+    setLoadingHistory(true);
+    try {
+      const res = await fetch('/api/search-history');
+      const data = await res.json();
+      setSearchHistory(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.error('Failed to load search history:', e);
+    } finally {
+      setLoadingHistory(false);
+    }
+  }
 
   const stats = useMemo(() => {
     return {
@@ -288,6 +304,40 @@ export default function AdminHome() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Search History - VULNERABLE TO STORED XSS */}
+        <div className="mt-8 rounded bg-white p-4 shadow">
+          <h3 className="mb-4 text-lg font-semibold">Search History</h3>
+          {loadingHistory ? (
+            <p className="text-gray-600">Loading search history...</p>
+          ) : searchHistory.length === 0 ? (
+            <p className="text-gray-600">No search history yet.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-left text-sm">
+                <thead className="border-b bg-gray-50 text-xs uppercase tracking-wide text-gray-600">
+                  <tr>
+                    <th className="px-4 py-3">ID</th>
+                    <th className="px-4 py-3">Search Term</th>
+                    <th className="px-4 py-3">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {searchHistory.map((item) => (
+                    <tr key={item.id} className="border-t">
+                      <td className="px-4 py-3">{item.id}</td>
+                      {/* VULNERABLE: Stored XSS - Search term rendered without sanitization */}
+                      <td className="px-4 py-3" dangerouslySetInnerHTML={{ __html: item.search_term }} />
+                      <td className="px-4 py-3">
+                        {new Date(item.created_at).toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </main>
       <Footer />

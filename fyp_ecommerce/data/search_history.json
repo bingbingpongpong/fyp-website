@@ -1,0 +1,372 @@
+[
+  {
+    "id": 1,
+    "search_term": "<script>alert(document.cookie)</script>",
+    "created_at": "2025-11-13T02:51:35.808Z"
+  },
+  {
+    "id": 2,
+    "search_term": "<script>alert(document.cookie)</script>",
+    "created_at": "2025-11-13T02:51:35.827Z"
+  },
+  {
+    "id": 3,
+    "search_term": "export default async function handler(req, res) {   const { q } = req.query;",
+    "created_at": "2025-11-13T02:52:26.375Z"
+  },
+  {
+    "id": 4,
+    "search_term": "export default async function handler(req, res) {   const { q } = req.query;",
+    "created_at": "2025-11-13T02:52:26.402Z"
+  },
+  {
+    "id": 5,
+    "search_term": "export default async function handler(req, res) {   const { q } = req.query;      // Store search term without sanitization   await db.execute('INSERT INTO search_logs (term) VALUES (?)', [q]);      // Return raw search term - REFLECTED XSS   res.status(200).json({      results: [...],      searchTerm: q // VULNERABLE - no encoding   }); }",
+    "created_at": "2025-11-13T02:52:51.300Z"
+  },
+  {
+    "id": 6,
+    "search_term": "export default async function handler(req, res) {   const { q } = req.query;      // Store search term without sanitization   await db.execute('INSERT INTO search_logs (term) VALUES (?)', [q]);      // Return raw search term - REFLECTED XSS   res.status(200).json({      results: [...],      searchTerm: q // VULNERABLE - no encoding   }); }",
+    "created_at": "2025-11-13T02:52:51.316Z"
+  },
+  {
+    "id": 7,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:53:12.982Z"
+  },
+  {
+    "id": 8,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:53:12.995Z"
+  },
+  {
+    "id": 9,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:53:13.760Z"
+  },
+  {
+    "id": 10,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:53:13.936Z"
+  },
+  {
+    "id": 11,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:53:14.119Z"
+  },
+  {
+    "id": 12,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:53:14.436Z"
+  },
+  {
+    "id": 13,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:53:14.734Z"
+  },
+  {
+    "id": 14,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:53:14.993Z"
+  },
+  {
+    "id": 15,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:53:15.056Z"
+  },
+  {
+    "id": 16,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:53:15.071Z"
+  },
+  {
+    "id": 17,
+    "search_term": "/search?q=<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:53:32.363Z"
+  },
+  {
+    "id": 18,
+    "search_term": "/search?q=<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:53:32.468Z"
+  },
+  {
+    "id": 19,
+    "search_term": "/search?q=<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:53:33.200Z"
+  },
+  {
+    "id": 20,
+    "search_term": "/search?q=<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:53:33.947Z"
+  },
+  {
+    "id": 21,
+    "search_term": "/search?q=<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:53:34.683Z"
+  },
+  {
+    "id": 22,
+    "search_term": "/search?q=<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:53:35.087Z"
+  },
+  {
+    "id": 23,
+    "search_term": "<img src=x onerror=\"alert('Stored XSS')\">",
+    "created_at": "2025-11-13T02:53:47.136Z"
+  },
+  {
+    "id": 24,
+    "search_term": "<img src=x onerror=\"alert('Stored XSS')\">",
+    "created_at": "2025-11-13T02:53:47.167Z"
+  },
+  {
+    "id": 25,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:01.378Z"
+  },
+  {
+    "id": 26,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:01.394Z"
+  },
+  {
+    "id": 27,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:02.556Z"
+  },
+  {
+    "id": 28,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:02.912Z"
+  },
+  {
+    "id": 29,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:03.138Z"
+  },
+  {
+    "id": 30,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:03.319Z"
+  },
+  {
+    "id": 31,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:03.497Z"
+  },
+  {
+    "id": 32,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:03.688Z"
+  },
+  {
+    "id": 33,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:03.890Z"
+  },
+  {
+    "id": 34,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:04.054Z"
+  },
+  {
+    "id": 35,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:04.293Z"
+  },
+  {
+    "id": 36,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:04.668Z"
+  },
+  {
+    "id": 37,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:04.947Z"
+  },
+  {
+    "id": 38,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:04.960Z"
+  },
+  {
+    "id": 39,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:05.175Z"
+  },
+  {
+    "id": 40,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:05.602Z"
+  },
+  {
+    "id": 41,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:05.701Z"
+  },
+  {
+    "id": 42,
+    "search_term": "?q=<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:14.816Z"
+  },
+  {
+    "id": 43,
+    "search_term": "?q=<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:14.828Z"
+  },
+  {
+    "id": 44,
+    "search_term": "?q=<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:15.691Z"
+  },
+  {
+    "id": 45,
+    "search_term": "?q=<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:15.892Z"
+  },
+  {
+    "id": 46,
+    "search_term": "?q=<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:16.234Z"
+  },
+  {
+    "id": 47,
+    "search_term": "?q=<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:16.477Z"
+  },
+  {
+    "id": 48,
+    "search_term": "?q=<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:16.695Z"
+  },
+  {
+    "id": 49,
+    "search_term": "?q=<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:16.881Z"
+  },
+  {
+    "id": 50,
+    "search_term": "?q=<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:17.063Z"
+  },
+  {
+    "id": 51,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:19.758Z"
+  },
+  {
+    "id": 52,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:19.773Z"
+  },
+  {
+    "id": 53,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:20.260Z"
+  },
+  {
+    "id": 54,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:20.543Z"
+  },
+  {
+    "id": 55,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:54:20.725Z"
+  },
+  {
+    "id": 56,
+    "search_term": "test",
+    "created_at": "2025-11-13T02:54:47.591Z"
+  },
+  {
+    "id": 57,
+    "search_term": "test",
+    "created_at": "2025-11-13T02:54:47.609Z"
+  },
+  {
+    "id": 58,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:55:06.079Z"
+  },
+  {
+    "id": 59,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:55:16.727Z"
+  },
+  {
+    "id": 60,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:55:49.165Z"
+  },
+  {
+    "id": 61,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:55:51.292Z"
+  },
+  {
+    "id": 62,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:56:03.865Z"
+  },
+  {
+    "id": 63,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:56:05.941Z"
+  },
+  {
+    "id": 64,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:56:17.129Z"
+  },
+  {
+    "id": 65,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:56:19.414Z"
+  },
+  {
+    "id": 66,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:56:22.291Z"
+  },
+  {
+    "id": 67,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:56:30.021Z"
+  },
+  {
+    "id": 68,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T02:56:53.160Z"
+  },
+  {
+    "id": 69,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T03:27:48.529Z"
+  },
+  {
+    "id": 70,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T03:27:48.550Z"
+  },
+  {
+    "id": 71,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T03:28:23.012Z"
+  },
+  {
+    "id": 72,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T03:28:48.380Z"
+  },
+  {
+    "id": 73,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T03:28:49.136Z"
+  },
+  {
+    "id": 74,
+    "search_term": "<script>alert('XSS')</script>",
+    "created_at": "2025-11-13T03:28:49.328Z"
+  }
+]
