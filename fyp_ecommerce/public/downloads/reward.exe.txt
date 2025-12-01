@@ -1,0 +1,5 @@
+This is a harmless demo file used for educational cybersecurity demonstrations.
+There is no real executable content here.
+In a real attack, an adversary might try to trick users into downloading malware.
+
+

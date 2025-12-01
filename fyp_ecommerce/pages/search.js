@@ -1,5 +1,5 @@
 // pages/search.js - VULNERABLE TO REFLECTED XSS
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Navigation from '../components/Navigation';
@@ -8,31 +8,32 @@ import ProductGrid from '../components/ProductGrid';
 
 export default function Search({ searchQuery }) {
   const router = useRouter();
-  // Use server-side query if available, otherwise use client-side
   const q = searchQuery || router.query.q;
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState(q || '');
-  const xssRef = useRef(null);
-  const xssRef2 = useRef(null);
-  const xssRef3 = useRef(null);
 
   useEffect(() => {
     if (q) {
       setSearchTerm(q);
       performSearch(q);
-      
-      // VULNERABLE: Direct DOM manipulation to ensure XSS works
-      if (xssRef.current) {
-        xssRef.current.innerHTML = String(q);
-      }
-      if (xssRef2.current) {
-        xssRef2.current.innerHTML = `Results for: ${String(q)}`;
-      }
-      if (xssRef3.current) {
-        xssRef3.current.innerHTML = `<strong>You searched for:</strong> ${String(q)}`;
-      }
     }
+  }, [q]);
+
+  const highlightedTerm = useMemo(() => {
+    if (!q) return '';
+    // Build a small highlight message for the hero banner
+    return `Showing results for <strong>${q}</strong>`;
+  }, [q]);
+
+  const announcement = useMemo(() => {
+    if (!q) return '';
+    const chips = q
+      .split(' ')
+      .filter(Boolean)
+      .map((part) => `<span class="px-2 py-1 bg-white text-xs rounded">${part}</span>`)
+      .join('');
+    return `<div class="flex flex-wrap gap-2">${chips}</div>`;
   }, [q]);
 
   async function performSearch(term) {
@@ -52,7 +53,6 @@ export default function Search({ searchQuery }) {
 
   function handleSubmit(e) {
     e.preventDefault();
-    // VULNERABLE: Don't encode the search term in URL to allow XSS
     router.push(`/search?q=${searchTerm}`);
     performSearch(searchTerm);
   }
@@ -84,24 +84,19 @@ export default function Search({ searchQuery }) {
           </div>
         </form>
 
-        {/* VULNERABLE: Reflected XSS - Search term rendered without sanitization */}
         {q && (
-          <div className="mb-6">
-            <p className="text-gray-600">
-              Search results for: <span ref={xssRef} />
-            </p>
-            {/* VULNERABLE: Also render in heading without sanitization */}
-            <h2 className="text-xl font-semibold mb-2" ref={xssRef2} />
-            <p className="text-sm text-gray-500 mt-2">
+          <div className="mb-6 space-y-3">
+            <div
+              className="rounded bg-amber-50 p-3 text-sm text-amber-900"
+              dangerouslySetInnerHTML={{ __html: highlightedTerm }}
+            />
+            <p className="text-xs uppercase tracking-wide text-gray-500">
               Found {products.length} product{products.length !== 1 ? 's' : ''}
             </p>
-            {/* VULNERABLE: Render in div as well */}
-            <div className="mt-4 p-4 bg-gray-100 rounded" ref={xssRef3} />
-            {/* VULNERABLE: Also use dangerouslySetInnerHTML as backup */}
-            <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
-              <p className="text-sm">Raw search term (dangerouslySetInnerHTML):</p>
-              <div dangerouslySetInnerHTML={{ __html: String(q) }} />
-            </div>
+            <div
+              className="rounded border border-dashed border-gray-300 bg-white/70 p-3"
+              dangerouslySetInnerHTML={{ __html: announcement }}
+            />
           </div>
         )}
 

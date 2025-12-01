@@ -6,6 +6,48 @@ export default function Cart({ initialItems }) {
   const [items, setItems] = useState(Array.isArray(initialItems) ? initialItems : []);
   const [updatingId, setUpdatingId] = useState(null);
   const [error, setError] = useState('');
+  const [xssEnabled, setXssEnabled] = useState(false);
+
+  // Check XSS enabled on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const xssEnabledFlag = localStorage.getItem('xssEnabled') === 'true';
+      setXssEnabled(xssEnabledFlag);
+    }
+  }, []);
+
+  // DOM XSS vulnerability: promo code feature
+  // POTENTIALLY VULNERABLE (for lab demonstration)
+  // This code reads user input and sets it directly into innerHTML without sanitization
+  // XSS is enabled when xssEnabled flag is true
+  useEffect(() => {
+    const applyBtn = document.getElementById('applyCodeBtn');
+    const input = document.getElementById('promoCode');
+    const message = document.getElementById('promoMessage');
+
+    if (!applyBtn || !input || !message) return;
+
+    const handleClick = () => {
+      const code = input.value;
+
+      // Check if XSS is enabled
+      const isXssActive = typeof window !== 'undefined' && localStorage.getItem('xssEnabled') === 'true';
+
+      if (isXssActive) {
+        // Developer assumed promo codes are plain text
+        // POTENTIALLY VULNERABLE: no HTML escaping here, so scripts/HTML will be interpreted.
+        message.innerHTML = 'Applied: ' + code;
+      } else {
+        // XSS disabled - render as plain text
+        message.textContent = 'Applied: ' + code;
+      }
+    };
+
+    applyBtn.addEventListener('click', handleClick);
+    return () => {
+      applyBtn.removeEventListener('click', handleClick);
+    };
+  }, [xssEnabled]);
 
   useEffect(() => {
     // Ensure hydration consistency
@@ -136,6 +178,34 @@ export default function Cart({ initialItems }) {
                   <span className="font-semibold">S${totals.grand.toFixed(2)}</span>
                 </div>
               </div>
+
+              {/* POTENTIALLY VULNERABLE (for lab demonstration):
+                  DOM-based XSS via promo code feature.
+                  A normal developer might forget to sanitize here.
+                  XSS is enabled when xssEnabled flag is true. */}
+              <div className="mt-6 border-t pt-4 space-y-3 text-sm">
+                <h3 className="font-semibold">Have a promo code?</h3>
+                <div className="flex gap-2">
+                  <input
+                    id="promoCode"
+                    type="text"
+                    className="flex-1 rounded border px-3 py-2 text-sm"
+                    placeholder="Enter promo code"
+                  />
+                  <button
+                    id="applyCodeBtn"
+                    type="button"
+                    className="rounded bg-gray-900 px-4 py-2 text-xs font-medium uppercase tracking-wide text-white"
+                  >
+                    Apply
+                  </button>
+                </div>
+                <div
+                  id="promoMessage"
+                  className="min-h-[1.5rem] text-xs text-green-700"
+                />
+              </div>
+
               <a
                 href="/checkout"
                 className="mt-4 block w-full rounded-full bg-black py-3 text-center text-white transition hover:bg-gray-900"

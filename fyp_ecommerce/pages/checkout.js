@@ -1,5 +1,5 @@
 // pages/checkout.js
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Navigation from '../components/Navigation';
@@ -12,6 +12,8 @@ export default function Checkout() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const redirectInitiated = useRef(false);
+  const alertShown = useRef(false);
 
   // Form fields
   const [formData, setFormData] = useState({
@@ -115,10 +117,7 @@ export default function Checkout() {
       for (const item of cartItems) {
         await fetch(`/api/cart?id=${item.id}`, { method: 'DELETE' });
       }
-      // Redirect after 2 seconds
-      setTimeout(() => {
-        router.push('/');
-      }, 2000);
+      // Redirect is handled in useEffect to ensure it only happens once
     } catch (err) {
       setError(err.message || 'Checkout failed. Please try again.');
     } finally {
@@ -153,6 +152,17 @@ export default function Checkout() {
       </>
     );
   }
+
+  // Handle redirect only once when success is true
+  useEffect(() => {
+    if (success && !redirectInitiated.current) {
+      redirectInitiated.current = true;
+      const timer = setTimeout(() => {
+        router.push('/');
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [success, router]);
 
   if (success) {
     return (

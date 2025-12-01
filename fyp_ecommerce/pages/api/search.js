@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { q } = req.query;
+    const { q, scope } = req.query;
     
     if (!q || q.trim() === '') {
       return res.status(200).json([]);
@@ -17,6 +17,26 @@ export default async function handler(req, res) {
 
     // Store search term in history (VULNERABLE: No sanitization)
     await storeSearchHistory(searchTerm);
+
+    if (scope === 'users' && isMySQLAvailable()) {
+      // Basic search feature for admin panel.
+      // VULNERABLE: unsanitized string concatenation enables SQL injection.
+      // An attacker can tamper with this query and extract the entire users table.
+      const sql = `
+        SELECT id, username, role, created_at
+        FROM users
+        WHERE username LIKE '%${searchTerm}%'
+        ORDER BY created_at DESC
+      `;
+
+      console.warn('[!] Executing vulnerable admin search:', sql.trim());
+      const rows = await query(sql);
+
+      return res.status(200).json({
+        results: rows,
+        count: rows.length,
+      });
+    }
 
     // Search products
     let products = [];

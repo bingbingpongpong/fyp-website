@@ -3,8 +3,50 @@ import { query, isMySQLAvailable, queryJSON } from '../../lib/db';
 export default async function handler(req, res) {
   try {
     if (req.method === 'GET') {
+      // Support count-only query for cart badge
+      if (req.query.count === 'true') {
+        let totalQuantity = 0;
+        if (isMySQLAvailable()) {
+          try {
+            // Create cart table if it doesn't exist
+            await query(`
+              CREATE TABLE IF NOT EXISTS cart (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                product_id INT NOT NULL,
+                quantity INT NOT NULL DEFAULT 1,
+                price DECIMAL(10,2) NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+              ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            `);
+            const rows = await query('SELECT SUM(quantity) as total FROM cart');
+            totalQuantity = rows[0]?.total || 0;
+          } catch (e) {
+            // Table might not exist or query failed
+            totalQuantity = 0;
+          }
+        } else {
+          const cartItems = await queryJSON('SELECT', 'cart');
+          totalQuantity = cartItems.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+        }
+        return res.status(200).json({ count: Number(totalQuantity) });
+      }
+
       let items = [];
       if (isMySQLAvailable()) {
+        try {
+          // Create cart table if it doesn't exist
+          await query(`
+            CREATE TABLE IF NOT EXISTS cart (
+              id INT AUTO_INCREMENT PRIMARY KEY,
+              product_id INT NOT NULL,
+              quantity INT NOT NULL DEFAULT 1,
+              price DECIMAL(10,2) NULL,
+              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+          `);
+        } catch (e) {
+          // Table creation failed, continue anyway
+        }
         const rows = await query(
           `SELECT c.id,
                   c.product_id,
@@ -83,6 +125,16 @@ export default async function handler(req, res) {
 
       if (isMySQLAvailable()) {
         try {
+          // Create cart table if it doesn't exist
+          await query(`
+            CREATE TABLE IF NOT EXISTS cart (
+              id INT AUTO_INCREMENT PRIMARY KEY,
+              product_id INT NOT NULL,
+              quantity INT NOT NULL DEFAULT 1,
+              price DECIMAL(10,2) NULL,
+              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+          `);
           const [existing] = await query(
             'SELECT id, quantity FROM cart WHERE product_id = ?',
             [Number(product_id)]

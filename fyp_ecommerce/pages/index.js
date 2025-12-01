@@ -1,10 +1,44 @@
 // pages/index.js
 import Head from 'next/head';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { useEffect } from 'react';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 
 export default function Home() {
+  const router = useRouter();
+  const { redirect } = router.query;
+
+  // VULNERABLE: Reflected XSS via redirect parameter
+  // This is intentionally vulnerable for educational/demonstration purposes
+  useEffect(() => {
+    if (redirect && typeof window !== 'undefined') {
+      // POTENTIALLY VULNERABLE: Using redirect parameter directly without sanitization
+      // This allows javascript: protocol and other XSS vectors
+      try {
+        // Decode URL if needed
+        const decodedRedirect = decodeURIComponent(redirect);
+        
+        // Check if it's a javascript: protocol (XSS vector)
+        if (decodedRedirect.toLowerCase().startsWith('javascript:')) {
+          // Execute the JavaScript (VULNERABLE)
+          const jsCode = decodedRedirect.substring(11); // Remove 'javascript:' prefix
+          // Use Function constructor to execute (more reliable than eval in some contexts)
+          new Function(jsCode)();
+        } else if (decodedRedirect.startsWith('http://') || decodedRedirect.startsWith('https://') || decodedRedirect.startsWith('/')) {
+          // Regular URL redirect
+          window.location.href = decodedRedirect;
+        } else {
+          // Try as relative path or direct assignment
+          window.location.href = decodedRedirect;
+        }
+      } catch (e) {
+        console.error('Redirect error:', e);
+      }
+    }
+  }, [redirect]);
+
   return (
     <>
       <Head>

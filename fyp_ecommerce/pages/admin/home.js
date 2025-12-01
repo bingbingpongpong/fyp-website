@@ -1,5 +1,6 @@
 // pages/admin/home.js
 import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import Navigation from '../../components/Navigation';
 import Footer from '../../components/Footer';
 import { useRouter } from 'next/router';
@@ -143,7 +144,15 @@ export default function AdminHome() {
     <>
       <Navigation />
       <main className="container mx-auto px-6 py-8">
-        <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
+        <div className="mb-6 flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+          <Link
+            href="/admin/reviews"
+            className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            Manage Reviews
+          </Link>
+        </div>
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -327,8 +336,8 @@ export default function AdminHome() {
                   {searchHistory.map((item) => (
                     <tr key={item.id} className="border-t">
                       <td className="px-4 py-3">{item.id}</td>
-                      {/* VULNERABLE: Stored XSS - Search term rendered without sanitization */}
-                      <td className="px-4 py-3" dangerouslySetInnerHTML={{ __html: item.search_term }} />
+                      {/* Safe rendering - search term rendered as plain text */}
+                      <td className="px-4 py-3">{item.search_term}</td>
                       <td className="px-4 py-3">
                         {new Date(item.created_at).toLocaleString()}
                       </td>
