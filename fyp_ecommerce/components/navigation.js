@@ -1,8 +1,40 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    async function fetchCartCount() {
+      try {
+        const res = await fetch('/api/cart?count=true');
+        if (!res.ok) {
+          console.error('Cart count fetch failed:', res.status);
+          return;
+        }
+        const data = await res.json();
+        setCartCount(data.count || 0);
+      } catch (e) {
+        console.error('Cart count error:', e);
+      }
+    }
+
+    // Only run on client side
+    if (typeof window !== 'undefined') {
+      fetchCartCount();
+      // Refresh cart count every 2 seconds to keep it updated
+      const interval = setInterval(fetchCartCount, 2000);
+      // Also refresh when window gains focus
+      const handleFocus = () => fetchCartCount();
+      window.addEventListener('focus', handleFocus);
+
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener('focus', handleFocus);
+      };
+    }
+  }, []);
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
@@ -35,8 +67,8 @@ export default function Header() {
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
-              <span className="absolute -top-1 -right-1 bg-accent text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                0
+              <span className="absolute -top-1 -right-1 bg-accent text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
+                {cartCount > 99 ? '99+' : cartCount}
               </span>
             </Link>
 

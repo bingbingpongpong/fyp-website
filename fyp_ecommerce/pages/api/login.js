@@ -4,9 +4,12 @@ import { query, isMySQLAvailable, getDbPool } from '../../lib/db';
 const issueSessionCookie = (res, username) => {
   const expires = new Date(Date.now() + 60 * 60 * 1000).toUTCString();
   const sessionValue = `${username}:${Date.now()}`;
+
+  // NOTE: Intentionally omitting SameSite protection here to demonstrate CSRF.
+  // In a real app you would want SameSite=Lax or Strict to mitigate CSRF.
   res.setHeader(
     'Set-Cookie',
-    `adminSession=${sessionValue}; Path=/; Expires=${expires}; SameSite=Lax`
+    `adminSession=${sessionValue}; Path=/; Expires=${expires}`
   );
 };
 
@@ -31,18 +34,37 @@ export default async function handler(req, res) {
           username VARCHAR(255) NOT NULL UNIQUE,
           password VARCHAR(255) NOT NULL,
           role VARCHAR(50) DEFAULT 'admin',
+          email VARCHAR(255) NULL,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
       `);
 
+      // Add email column if it doesn't exist
+      try {
+        await query('ALTER TABLE users ADD COLUMN email VARCHAR(255) NULL');
+      } catch (e) {
+        // Column already exists, ignore
+      }
+
       // Insert default admin user if it doesn't exist
       try {
         await query(`
-          INSERT IGNORE INTO users (username, password, role) 
-          VALUES ('admin', 'admin123', 'admin')
+          INSERT IGNORE INTO users (username, password, role, email) 
+          VALUES ('admin', 'admin123', 'admin', 'alice@GreenFactory.com')
         `);
       } catch (e) {
         // User might already exist, ignore
+      }
+
+      // Update admin user email to alice@GreenFactory.com
+      try {
+        await query(`
+          UPDATE users 
+          SET email = 'alice@GreenFactory.com' 
+          WHERE username = 'admin'
+        `);
+      } catch (e) {
+        // Ignore update errors
       }
 
       // ⚠️ VULNERABLE TO SQL INJECTION ⚠️

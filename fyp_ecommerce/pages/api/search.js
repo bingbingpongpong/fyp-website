@@ -23,7 +23,7 @@ export default async function handler(req, res) {
       // VULNERABLE: unsanitized string concatenation enables SQL injection.
       // An attacker can tamper with this query and extract the entire users table.
       const sql = `
-        SELECT id, username, role, created_at
+        SELECT id, username, role, email, created_at
         FROM users
         WHERE username LIKE '%${searchTerm}%'
         ORDER BY created_at DESC

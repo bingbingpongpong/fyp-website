@@ -146,12 +146,20 @@ export default function AdminHome() {
       <main className="container mx-auto px-6 py-8">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-          <Link
-            href="/admin/reviews"
-            className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-          >
-            Manage Reviews
-          </Link>
+          <div className="flex gap-3">
+            <Link
+              href="/admin/reviews"
+              className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            >
+              Manage Reviews
+            </Link>
+            <Link
+              href="/admin/change-password"
+              className="rounded bg-gray-800 px-4 py-2 text-sm font-medium text-white hover:bg-black"
+            >
+              Change Password
+            </Link>
+          </div>
         </div>
 
         {/* Stats */}

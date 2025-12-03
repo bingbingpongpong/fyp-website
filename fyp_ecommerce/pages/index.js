@@ -42,7 +42,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>SwiftKicks Commerce | Premium Sportswear</title>
+        <title>Green Factory | Premium Sportswear</title>
       </Head>
 
       <div className="bg-secondary font-sans">
