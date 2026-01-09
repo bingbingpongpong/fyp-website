@@ -1,0 +1,10 @@
+[
+  {
+    "id": 1,
+    "product_id": 7,
+    "name": "sadf",
+    "rating": 5,
+    "comment": "<img src=x onerror=\"alert('DOM XSS Works!')\">",
+    "created_at": "2026-01-08T22:48:58.948Z"
+  }
+]

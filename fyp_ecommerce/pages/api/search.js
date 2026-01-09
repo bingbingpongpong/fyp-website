@@ -1,5 +1,5 @@
 // pages/api/search.js - VULNERABLE: Stores search terms without sanitization
-import { query, isMySQLAvailable, queryJSON } from '../../lib/db';
+import { query, isMySQLAvailable, queryJSON, getDbPool } from '../../lib/db';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -9,11 +9,17 @@ export default async function handler(req, res) {
   try {
     const { q, scope } = req.query;
     
+    // Debug: Log raw query parameters
+    console.log('[DEBUG] Raw query params:', { q, scope, isMySQLAvailable: isMySQLAvailable() });
+    
     if (!q || q.trim() === '') {
       return res.status(200).json([]);
     }
 
     const searchTerm = q.trim();
+    
+    // Debug: Log the search term being used
+    console.log('[DEBUG] Search term after trim:', searchTerm);
 
     // Store search term in history (VULNERABLE: No sanitization)
     await storeSearchHistory(searchTerm);
@@ -30,12 +36,32 @@ export default async function handler(req, res) {
       `;
 
       console.warn('[!] Executing vulnerable admin search:', sql.trim());
-      const rows = await query(sql);
+      // Use pool.query() instead of query() to bypass prepared statements
+      // This makes it vulnerable to SQL injection
+      const pool = getDbPool();
+      
+      if (!pool) {
+        console.error('[ERROR] Database pool is null!');
+        return res.status(500).json({ message: 'Database connection failed' });
+      }
+      
+      try {
+        const [rows] = await pool.query(sql);
+        console.log('[DEBUG] Query executed successfully, rows returned:', rows.length);
 
-      return res.status(200).json({
-        results: rows,
-        count: rows.length,
-      });
+        return res.status(200).json({
+          results: rows,
+          count: rows.length,
+        });
+      } catch (sqlError) {
+        console.error('[ERROR] SQL execution failed:', sqlError.message);
+        console.error('[ERROR] SQL that failed:', sql.trim());
+        return res.status(500).json({ 
+          message: 'SQL execution error', 
+          error: sqlError.message,
+          sql: sql.trim() // Return SQL for debugging (remove in production!)
+        });
+      }
     }
 
     // Search products
