@@ -22,6 +22,9 @@ export default function AdminHome() {
   const [saving, setSaving] = useState(false);
   const [searchHistory, setSearchHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   // Client-side auth guard
   useEffect(() => {
@@ -74,6 +77,8 @@ export default function AdminHome() {
   function startCreate() {
     setEditingId(null);
     setForm({ name: '', price: '', gender_id: '1', sale: false, sale_price: '', image: '/2.png' });
+    setImageFile(null);
+    setImagePreview(null);
   }
 
   function startEdit(p) {
@@ -86,6 +91,52 @@ export default function AdminHome() {
       sale_price: p.sale_price ? String(p.sale_price) : '',
       image: p.image || '/2.png',
     });
+    setImageFile(null);
+    setImagePreview(p.image || '/2.png');
+  }
+
+  function handleImageChange(e) {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file size (10MB max)
+      if (file.size > 10 * 1024 * 1024) {
+        setError('File size must be less than 10MB');
+        return;
+      }
+      
+      setImageFile(file);
+      setError('');
+      
+      // Create preview - show image if it's an image, otherwise show file info
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagePreview(reader.result);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        // For non-image files (like JS), show file info instead of preview
+        setImagePreview(null);
+      }
+    }
+  }
+
+  async function uploadImage(file) {
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message || 'Upload failed');
+    }
+
+    const data = await res.json();
+    return data.path;
   }
 
   async function handleSave(e) {
@@ -95,16 +146,35 @@ export default function AdminHome() {
     try {
       if (!form.name || form.price === '') {
         setError('Name and price are required');
+        setSaving(false);
         return;
       }
+
+      let imagePath = form.image || '/2.png';
+
+      // Upload image if a file is selected
+      if (imageFile) {
+        setUploading(true);
+        try {
+          imagePath = await uploadImage(imageFile);
+        } catch (uploadError) {
+          setError(uploadError.message || 'Image upload failed');
+          setSaving(false);
+          setUploading(false);
+          return;
+        }
+        setUploading(false);
+      }
+
       const payload = {
         name: form.name,
         price: Number(form.price),
         gender_id: Number(form.gender_id),
         sale: Boolean(form.sale),
         sale_price: form.sale_price ? Number(form.sale_price) : null,
-        image: form.image || '/2.png',
+        image: imagePath,
       };
+
       if (editingId) {
         const res = await fetch('/api/products', {
           method: 'PUT',
@@ -126,6 +196,7 @@ export default function AdminHome() {
       setError(e.message || 'Save failed');
     } finally {
       setSaving(false);
+      setUploading(false);
     }
   }
 
@@ -242,19 +313,62 @@ export default function AdminHome() {
                 onChange={(e) => setForm((f) => ({ ...f, sale_price: e.target.value }))}
               />
             )}
-            <input
-              className="md:col-span-6 rounded border px-3 py-2"
-              placeholder="Image path (e.g., /2.png)"
-              value={form.image}
-              onChange={(e) => setForm((f) => ({ ...f, image: e.target.value }))}
-            />
+            <div className="md:col-span-6 space-y-2">
+              <label className="block text-sm font-medium text-gray-700">Product Image / File</label>
+              <div className="flex gap-4 items-start">
+                <div className="flex-1">
+                  <input
+                    type="file"
+                    accept="image/*,.js,.css,.html,.txt,.json,.pdf"
+                    onChange={handleImageChange}
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Upload a file: Images (JPG, PNG, GIF, WebP, SVG), JavaScript (.js), CSS, HTML, TXT, JSON, PDF (Max 10MB)
+                  </p>
+                  {imageFile && !imageFile.type.startsWith('image/') && (
+                    <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
+                      <p className="font-medium">Selected file: {imageFile.name}</p>
+                      <p className="text-gray-600">Type: {imageFile.type || 'Unknown'}</p>
+                      <p className="text-gray-600">Size: {(imageFile.size / 1024).toFixed(2)} KB</p>
+                    </div>
+                  )}
+                </div>
+                {imagePreview && imageFile && imageFile.type.startsWith('image/') && (
+                  <div className="flex-shrink-0">
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="w-24 h-24 object-cover rounded border"
+                    />
+                  </div>
+                )}
+              </div>
+              <input
+                type="text"
+                className="w-full rounded border px-3 py-2 text-sm"
+                placeholder="Or enter file path (e.g., /2.png, /uploads/image.jpg, /uploads/script.js)"
+                value={form.image}
+                onChange={(e) => {
+                  setForm((f) => ({ ...f, image: e.target.value }));
+                  if (!imageFile) {
+                    // Only show preview if it's an image path
+                    if (e.target.value.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i)) {
+                      setImagePreview(e.target.value);
+                    } else {
+                      setImagePreview(null);
+                    }
+                  }
+                }}
+              />
+            </div>
             <div className="md:col-span-6">
               <button
                 type="submit"
-                disabled={saving}
+                disabled={saving || uploading}
                 className="rounded bg-black px-5 py-2 text-white disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {saving ? 'Saving...' : editingId ? 'Update Product' : 'Create Product'}
+                {uploading ? 'Uploading image...' : saving ? 'Saving...' : editingId ? 'Update Product' : 'Create Product'}
               </button>
             </div>
           </form>

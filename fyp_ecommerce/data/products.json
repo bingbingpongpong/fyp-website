@@ -54,5 +54,41 @@
     "gender_id": 1,
     "sale": 1,
     "image": "/public/1.png"
+  },
+  {
+    "id": 8,
+    "name": "attack",
+    "price": 14,
+    "gender_id": 1,
+    "sale": 0,
+    "sale_price": null,
+    "image": "/2.png"
+  },
+  {
+    "id": 9,
+    "name": "attack",
+    "price": 18,
+    "gender_id": 1,
+    "sale": 0,
+    "sale_price": null,
+    "image": "/2.png"
+  },
+  {
+    "id": 10,
+    "name": "attack",
+    "price": 18,
+    "gender_id": 1,
+    "sale": 0,
+    "sale_price": null,
+    "image": "/2.png"
+  },
+  {
+    "id": 11,
+    "name": "attack",
+    "price": 18,
+    "gender_id": 1,
+    "sale": 0,
+    "sale_price": null,
+    "image": "/uploads/1768490801782-shell.js"
   }
 ]
