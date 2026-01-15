@@ -32,15 +32,9 @@ export default function ProductPage() {
       // Check if XSS is enabled (simple boolean flag)
       const xssEnabledFlag = localStorage.getItem('xssEnabled') === 'true';
       setXssEnabled(xssEnabledFlag);
-
-      // Prevent redirect loops - check if redirect already executed in this session
-      const redirectExecuted = sessionStorage.getItem('xssRedirectExecuted');
-      if (redirectExecuted === 'true') {
-        // Redirect already happened, disable XSS to prevent loop
-        setXssEnabled(false);
-        setShouldRenderXSS(false);
-        localStorage.removeItem('xssEnabled');
-      } else if (xssEnabledFlag) {
+      
+      // Set shouldRenderXSS based on flag
+      if (xssEnabledFlag) {
         setShouldRenderXSS(true);
       }
     }
@@ -59,94 +53,14 @@ export default function ProductPage() {
     loadReviews();
   }, [id]);
 
-  // Check if redirect already executed and disable XSS to prevent loops
+  // Update shouldRenderXSS when xssEnabled changes
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    
-    const redirectExecuted = sessionStorage.getItem('xssRedirectExecuted');
-    if (redirectExecuted === 'true') {
-      // Redirect already happened, disable XSS to prevent loops
-      setXssEnabled(false);
-      setShouldRenderXSS(false);
-      localStorage.removeItem('xssEnabled');
-    } else if (xssEnabled) {
-      setShouldRenderXSS(true);
-    }
+    setShouldRenderXSS(xssEnabled);
   }, [xssEnabled]);
 
-  // Inject script to intercept redirects and mark them in sessionStorage
-  useEffect(() => {
-    if (!shouldRenderXSS || typeof window === 'undefined') return;
-
-    // Inject a script that intercepts redirects BEFORE dangerous content renders
-    const script = document.createElement('script');
-    script.id = 'xss-redirect-guard';
-    script.textContent = `
-      (function() {
-        // Store original methods
-        const originalAssign = window.location.assign.bind(window.location);
-        const originalReplace = window.location.replace.bind(window.location);
-        
-        // Override assign
-        window.location.assign = function(url) {
-          if (sessionStorage.getItem('xssRedirectExecuted') === 'true') {
-            return; // Block redirect
-          }
-          sessionStorage.setItem('xssRedirectExecuted', 'true');
-          originalAssign(url);
-        };
-        
-        // Override replace
-        window.location.replace = function(url) {
-          if (sessionStorage.getItem('xssRedirectExecuted') === 'true') {
-            return; // Block redirect
-          }
-          sessionStorage.setItem('xssRedirectExecuted', 'true');
-          originalReplace(url);
-        };
-        
-        // Monitor for location changes (for direct href assignments)
-        let currentHref = window.location.href;
-        const checkLocation = function() {
-          if (sessionStorage.getItem('xssRedirectExecuted') === 'true') {
-            // Already redirected, prevent further changes
-            if (window.location.href !== currentHref) {
-              window.history.back();
-              return;
-            }
-          } else {
-            // Check if location changed (redirect happened)
-            if (window.location.href !== currentHref && window.location.href !== currentHref) {
-              sessionStorage.setItem('xssRedirectExecuted', 'true');
-            }
-            currentHref = window.location.href;
-          }
-        };
-        
-        // Poll for location changes (since we can't intercept href directly)
-        const interval = setInterval(checkLocation, 100);
-        
-        // Cleanup on page unload
-        window.addEventListener('beforeunload', function() {
-          clearInterval(interval);
-        });
-      })();
-    `;
-    
-    // Remove existing guard script if present
-    const existingScript = document.getElementById('xss-redirect-guard');
-    if (existingScript) {
-      existingScript.remove();
-    }
-    
-    document.head.appendChild(script);
-
-    return () => {
-      if (script.parentNode) {
-        script.parentNode.removeChild(script);
-      }
-    };
-  }, [shouldRenderXSS]);
+  // Note: Removed redirect protection to allow XSS to work properly
+  // In a real scenario, this would be a security vulnerability
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -202,57 +116,51 @@ export default function ProductPage() {
                 <span className="font-mono">{id}</span>
               </p>
             </div>
-            {isAdmin && (
-              <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
+              {/* XSS Control - Available to all users for demo */}
+              {shouldRenderXSS ? (
                 <button
-                  onClick={async () => {
-                    if (!confirm('Clear ALL reviews first to remove existing malicious scripts?')) return;
-                    // Prevent multiple executions
-                    if (alertShown.current) return;
-                    alertShown.current = true;
-                    try {
-                      const res = await fetch('/api/reviews-cleanup', { method: 'DELETE' });
-                      if (res.ok) {
-                        await loadReviews();
-                        if (typeof window !== 'undefined') {
-                          localStorage.setItem('xssEnabled', 'true');
-                          setXssEnabled(true);
-                        }
-                      }
-                    } catch (e) {
-                      // Silent error handling
-                    }
-                  }}
-                  className="rounded bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700"
-                >
-                  Clear & Enable XSS
-                </button>
-                <button
-                  onClick={async () => {
-                    if (!confirm('⚠️ EMERGENCY: Clear ALL reviews and disable XSS immediately?\n\nThis will:\n1. Delete all reviews (including malicious ones)\n2. Disable XSS\n3. Stop all script execution\n4. Reload page')) return;
-                    // Prevent multiple executions
-                    if (reloadInitiated.current) return;
-                    reloadInitiated.current = true;
-                    try {
-                      const res = await fetch('/api/reviews-cleanup', { method: 'DELETE' });
-                      if (res.ok) {
-                        if (typeof window !== 'undefined') {
-                          localStorage.removeItem('xssEnabled');
-                          setXssEnabled(false);
-                        }
-                        // Reload only once
-                        window.location.reload();
-                      }
-                    } catch (e) {
-                      reloadInitiated.current = false; // Reset on error
-                    }
+                  onClick={() => {
+                    localStorage.removeItem('xssEnabled');
+                    setXssEnabled(false);
+                    setShouldRenderXSS(false);
+                    window.location.reload();
                   }}
                   className="rounded bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
                 >
-                  🚨 Clear All & Stop XSS
+                  🚨 Disable XSS
                 </button>
-              </div>
-            )}
+              ) : (
+                <button
+                  onClick={() => {
+                    localStorage.setItem('xssEnabled', 'true');
+                    setXssEnabled(true);
+                    setShouldRenderXSS(true);
+                  }}
+                  className="rounded bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700"
+                >
+                  ⚠️ Enable XSS (Demo)
+                </button>
+              )}
+              {isAdmin && (
+                <button
+                  onClick={async () => {
+                    if (!confirm('Clear ALL reviews?')) return;
+                    try {
+                      const res = await fetch('/api/reviews-cleanup', { method: 'DELETE' });
+                      if (res.ok) {
+                        window.location.reload();
+                      }
+                    } catch (e) {
+                      console.error('Failed to clear reviews:', e);
+                    }
+                  }}
+                  className="rounded bg-gray-600 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700"
+                >
+                  Clear All Reviews
+                </button>
+              )}
+            </div>
           </div>
         </section>
 

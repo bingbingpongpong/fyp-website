@@ -21,32 +21,43 @@ export default function Cart({ initialItems }) {
   // This code reads user input and sets it directly into innerHTML without sanitization
   // XSS is enabled when xssEnabled flag is true
   useEffect(() => {
-    const applyBtn = document.getElementById('applyCodeBtn');
-    const input = document.getElementById('promoCode');
-    const message = document.getElementById('promoMessage');
+    // Wait for DOM to be ready
+    const setupXSS = () => {
+      const applyBtn = document.getElementById('applyCodeBtn');
+      const input = document.getElementById('promoCode');
+      const message = document.getElementById('promoMessage');
 
-    if (!applyBtn || !input || !message) return;
-
-    const handleClick = () => {
-      const code = input.value;
-
-      // Check if XSS is enabled
-      const isXssActive = typeof window !== 'undefined' && localStorage.getItem('xssEnabled') === 'true';
-
-      if (isXssActive) {
-        // Developer assumed promo codes are plain text
-        // POTENTIALLY VULNERABLE: no HTML escaping here, so scripts/HTML will be interpreted.
-        message.innerHTML = 'Applied: ' + code;
-      } else {
-        // XSS disabled - render as plain text
-        message.textContent = 'Applied: ' + code;
+      if (!applyBtn || !input || !message) {
+        // Retry if elements not found yet
+        setTimeout(setupXSS, 100);
+        return;
       }
+
+      const handleClick = () => {
+        const code = input.value;
+        if (!code) return;
+
+        // Check if XSS is enabled (check on each click for reliability)
+        const isXssActive = localStorage.getItem('xssEnabled') === 'true';
+
+        console.log('[DOM XSS] XSS Active:', isXssActive, 'Code:', code);
+
+        if (isXssActive) {
+          // Developer assumed promo codes are plain text
+          // POTENTIALLY VULNERABLE: no HTML escaping here, so scripts/HTML will be interpreted.
+          message.innerHTML = 'Applied: ' + code;
+        } else {
+          // XSS disabled - render as plain text
+          message.textContent = 'Applied: ' + code;
+        }
+      };
+
+      // Remove existing listener if any
+      applyBtn.removeEventListener('click', handleClick);
+      applyBtn.addEventListener('click', handleClick);
     };
 
-    applyBtn.addEventListener('click', handleClick);
-    return () => {
-      applyBtn.removeEventListener('click', handleClick);
-    };
+    setupXSS();
   }, [xssEnabled]);
 
   useEffect(() => {
