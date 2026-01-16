@@ -108,7 +108,7 @@ For FYP demonstration, you might want a browser-executable JavaScript payload:
 
 ```html
 <!-- If XSS exists, attacker could inject: -->
-<script src="/uploads/1768490801782-shell.js"></script>
+<script src="/uploads/name-shell.js"></script>
 ```
 
 ### For Your FYP Demo:

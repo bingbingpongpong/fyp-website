@@ -90,5 +90,14 @@
     "sale": 0,
     "sale_price": null,
     "image": "/uploads/1768490801782-shell.js"
+  },
+  {
+    "id": 12,
+    "name": "asd",
+    "price": 123,
+    "gender_id": 1,
+    "sale": 0,
+    "sale_price": null,
+    "image": "/uploads/1768521838551-shell.js"
   }
 ]

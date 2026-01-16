@@ -1068,5 +1068,35 @@
     "id": 214,
     "search_term": "%' OR '1'='1",
     "created_at": "2026-01-09T02:39:17.576Z"
+  },
+  {
+    "id": 215,
+    "search_term": "<script src=\"/uploads/1768490801782-shell.js\"></script>",
+    "created_at": "2026-01-16T00:22:24.462Z"
+  },
+  {
+    "id": 216,
+    "search_term": "<script src=\"/uploads/1768490801782-shell.js\"></script>",
+    "created_at": "2026-01-16T00:24:39.108Z"
+  },
+  {
+    "id": 217,
+    "search_term": "<script src=\"/uploads/browser-shell.js\"></script>",
+    "created_at": "2026-01-16T00:25:01.041Z"
+  },
+  {
+    "id": 218,
+    "search_term": "<script src=\"/uploads/browser-shell.js\"></script>",
+    "created_at": "2026-01-16T00:25:23.491Z"
+  },
+  {
+    "id": 219,
+    "search_term": "<script src=\"/uploads/browser-shell.js\"></script>",
+    "created_at": "2026-01-16T00:25:26.072Z"
+  },
+  {
+    "id": 220,
+    "search_term": "<script src=\"/uploads/browser-shell.js\"></script>",
+    "created_at": "2026-01-16T00:25:52.313Z"
   }
 ]

