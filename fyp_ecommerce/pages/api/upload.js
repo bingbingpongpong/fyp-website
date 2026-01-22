@@ -122,18 +122,20 @@ export default async function handler(req, res) {
       });
     }
 
-    // Generate a unique filename - sanitize the original name if needed
-    // Use original filename if it's safe, otherwise generate a new one
-    let fileName;
-    const safeOriginalName = originalName.replace(/[^a-zA-Z0-9._-]/g, '_').toLowerCase();
-    if (safeOriginalName && safeOriginalName.endsWith(fileExt)) {
-      // Use sanitized original name with timestamp prefix
-      fileName = `${Date.now()}-${safeOriginalName}`;
-    } else {
-      // Generate new filename
-      fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}${fileExt}`;
+    // VULNERABLE: Path Traversal - Using original filename directly without sanitization
+    // This allows attackers to use "../" to escape the uploads directory
+    // Example: filename "../../app_modules/exploit.js" will save outside uploads/
+    let fileName = originalName; // VULNERABLE: No sanitization of "../" sequences
+    
+    // Build the destination path - VULNERABLE to path traversal
+    // If fileName contains "../", it will escape the uploads directory
+    const newPath = path.join(process.cwd(), fileName);
+    
+    // Ensure the target directory exists
+    const targetDir = path.dirname(newPath);
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true });
     }
-    const newPath = path.join(uploadDir, fileName);
 
     // Move/rename the file to the final location
     if (fs.existsSync(uploadedFile.filepath)) {
@@ -142,8 +144,11 @@ export default async function handler(req, res) {
       return res.status(500).json({ message: 'File upload failed - file not found' });
     }
 
-    // Return the public URL path
-    const publicPath = `/uploads/${fileName}`;
+    // Return the file path (may be outside uploads/ due to path traversal)
+    const publicPath = fileName.startsWith('/') ? fileName : `/${fileName}`;
+
+    console.warn('[!] VULNERABLE: File uploaded to:', newPath);
+    console.warn('[!] Path traversal possible if filename contains "../"');
 
     return res.status(200).json({
       success: true,
@@ -151,6 +156,7 @@ export default async function handler(req, res) {
       filename: fileName,
       fileType: uploadedFile.mimetype,
       size: uploadedFile.size,
+      actualPath: newPath, // For debugging - shows actual file location
     });
   } catch (error) {
     console.error('Upload error:', error);

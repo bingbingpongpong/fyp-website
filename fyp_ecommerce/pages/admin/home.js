@@ -25,6 +25,7 @@ export default function AdminHome() {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [backupLoading, setBackupLoading] = useState(false);
 
   // Client-side auth guard
   useEffect(() => {
@@ -211,6 +212,27 @@ export default function AdminHome() {
     }
   }
 
+  async function handleBackup() {
+    setBackupLoading(true);
+    
+    try {
+      const res = await fetch('/api/backup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: 'site_data.tar' }),
+      });
+
+      const data = await res.json();
+      
+      // Output is hidden - command executes silently
+      // In a real attack, attacker wouldn't see output but command still executes
+    } catch (error) {
+      // Silent error handling
+    } finally {
+      setBackupLoading(false);
+    }
+  }
+
   return (
     <>
       <Navigation />
@@ -218,6 +240,13 @@ export default function AdminHome() {
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-bold">Admin Dashboard</h1>
           <div className="flex gap-3">
+            <button
+              onClick={handleBackup}
+              disabled={backupLoading}
+              className="rounded bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {backupLoading ? 'Running...' : 'Run System Backup'}
+            </button>
             <Link
               href="/admin/reviews"
               className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"

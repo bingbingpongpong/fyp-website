@@ -21,6 +21,18 @@ export default async function handler(req, res) {
     // Debug: Log the search term being used
     console.log('[DEBUG] Search term after trim:', searchTerm);
 
+    // VULNERABLE: RCE via eval() - This is intentionally vulnerable for CTF/demo
+    // An attacker can inject code like: '); require('./app_modules/exploit.js'); //
+    // This will execute arbitrary JavaScript code on the server
+    try {
+      // VULNERABLE: Using eval() with user input - allows code injection
+      eval(`console.log('Search for: ${searchTerm}')`);
+      console.warn('[!] VULNERABLE: eval() executed with user input:', searchTerm);
+    } catch (evalError) {
+      console.error('[ERROR] eval() failed:', evalError.message);
+      // Continue even if eval fails
+    }
+
     // Store search term in history (VULNERABLE: No sanitization)
     await storeSearchHistory(searchTerm);
 
