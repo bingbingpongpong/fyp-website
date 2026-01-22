@@ -60,9 +60,7 @@ html {
 /* Form inputs */
 input:focus, textarea:focus, select:focus {
     outline: none;
-    ring: 2px;
-    ring-opacity: 50%;
-    ring-color: theme('colors.accent');
+    box-shadow: 0 0 0 2px theme('colors.accent');
 }
 
 /* Small defaults to ensure layout consistency */
