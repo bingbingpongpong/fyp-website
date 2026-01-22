@@ -1,8 +1,14 @@
 /* globals.css — includes user sample CSS and small defaults */
-/* Tailwind utilities are loaded via CDN in _app.js */
+/* Tailwind CSS is now loaded locally (not via CDN) for offline/VMware compatibility */
 
-/* Custom styles that extend Tailwind */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* Tailwind directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Google Fonts - Optional (will fallback to system fonts if offline) */
+/* Commented out for offline compatibility - uncomment if internet is available */
+/* @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'); */
 
 body {
     font-family: 'Inter', sans-serif;

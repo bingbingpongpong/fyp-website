@@ -1,6 +1,5 @@
 // pages/_app.js
 import Head from 'next/head';
-import Script from 'next/script';
 import '../styles/globals.css';
 
 export default function App({ Component, pageProps }) {
@@ -10,8 +9,8 @@ export default function App({ Component, pageProps }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
-      {/* Load Tailwind CDN for quick setup */}
-      <Script src="https://cdn.tailwindcss.com" strategy="beforeInteractive" />
+      {/* Tailwind CSS is now loaded locally via globals.css (not CDN) */}
+      {/* This ensures the UI works offline and in VMware without internet access */}
 
       <Component {...pageProps} />
     </>

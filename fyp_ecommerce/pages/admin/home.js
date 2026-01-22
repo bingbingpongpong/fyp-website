@@ -224,10 +224,16 @@ export default function AdminHome() {
 
       const data = await res.json();
       
-      // Output is hidden - command executes silently
-      // In a real attack, attacker wouldn't see output but command still executes
+      // Command output is now visible in:
+      // 1. Browser Network tab (Response)
+      // 2. Server console logs
+      // 3. Response JSON contains 'command' and 'output' fields
+      
+      // For enumeration: Check Network tab → backup request → Response tab
+      // You'll see the executed command and its output
+      
     } catch (error) {
-      // Silent error handling
+      // Error visible in Network tab
     } finally {
       setBackupLoading(false);
     }

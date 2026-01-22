@@ -19,7 +19,9 @@ export default async function handler(req, res) {
       return res.status(400).json({ 
         success: false,
         error: 'Filename is required',
-        output: ''
+        output: '',
+        command: '',
+        filename: ''
       });
     }
 
@@ -42,22 +44,29 @@ export default async function handler(req, res) {
       cwd: process.cwd(), // Current working directory
     });
 
-    // Return the output
+    // Return the output - visible in Network Inspector for enumeration
     const output = stderr || stdout || 'Command executed (no output)';
     
     return res.status(200).json({
       success: true,
       error: null,
-      output: output
+      command: command, // The exact command that was executed
+      filename: filename, // The filename parameter received (may contain injection)
+      output: output, // Command output (stdout or stderr) - visible in Network tab
+      exitCode: stderr ? 1 : 0,
+      timestamp: new Date().toISOString()
     });
   } catch (error) {
     console.error('[ERROR] Backup command execution failed:', error.message);
     
-    // Return error message
+    // Return error message - also visible in Network Inspector
     return res.status(200).json({
       success: false,
       error: error.message,
-      output: error.message || 'Command execution failed'
+      output: error.message || 'Command execution failed',
+      command: req.body?.filename ? `tar -cvf ${req.body.filename} .` : 'N/A',
+      filename: req.body?.filename || 'N/A',
+      timestamp: new Date().toISOString()
     });
   }
 }
