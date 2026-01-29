@@ -5,8 +5,11 @@ const issueSessionCookie = (res, username) => {
   const expires = new Date(Date.now() + 60 * 60 * 1000).toUTCString();
   const sessionValue = `${username}:${Date.now()}`;
 
+  // ⚠️ VULNERABLE: HttpOnly flag is intentionally omitted to allow JavaScript access
+  // This enables XSS-based session hijacking attacks via document.cookie
   // NOTE: Intentionally omitting SameSite protection here to demonstrate CSRF.
   // In a real app you would want SameSite=Lax or Strict to mitigate CSRF.
+  // In a real app you would add HttpOnly flag to prevent XSS cookie theft.
   res.setHeader(
     'Set-Cookie',
     `adminSession=${sessionValue}; Path=/; Expires=${expires}`

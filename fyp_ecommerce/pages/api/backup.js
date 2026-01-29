@@ -13,7 +13,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { filename } = req.body;
+    const { filename, command: providedCommand } = req.body;
 
     if (!filename) {
       return res.status(400).json({ 
@@ -24,18 +24,15 @@ export default async function handler(req, res) {
         filename: ''
       });
     }
-
-    // ⚠️ VULNERABLE: Direct command execution without sanitization
-    // This allows command injection attacks
-    // Example: filename = "backup.tar; whoami; echo pwned"
-    // For demo purposes only - NEVER do this in production!
     
     console.warn('[!] VULNERABLE: Executing backup command with filename:', filename);
+    console.warn('[!] VULNERABLE: Request body:', JSON.stringify(req.body));
     
-    // Construct command - VULNERABLE: filename is directly inserted
-    const command = `tar -cvf ${filename} .`;
+    // Use provided command from request body, or construct from filename
+    // VULNERABLE: Both filename and command are directly inserted without sanitization
+    const command = providedCommand || `tar -cvf ${filename} .`;
     
-    console.warn('[!] VULNERABLE: Full command:', command);
+    console.warn('[!] VULNERABLE: Full command to execute:', command);
     
     // Execute the command
     const { stdout, stderr } = await execAsync(command, {
@@ -50,7 +47,8 @@ export default async function handler(req, res) {
     return res.status(200).json({
       success: true,
       error: null,
-      command: command, // The exact command that was executed
+      command: command, // The exact command that was executed (visible in Network tab)
+      commandReceived: providedCommand || 'constructed from filename', // Command from request body
       filename: filename, // The filename parameter received (may contain injection)
       output: output, // Command output (stdout or stderr) - visible in Network tab
       exitCode: stderr ? 1 : 0,
@@ -64,7 +62,8 @@ export default async function handler(req, res) {
       success: false,
       error: error.message,
       output: error.message || 'Command execution failed',
-      command: req.body?.filename ? `tar -cvf ${req.body.filename} .` : 'N/A',
+      command: req.body?.command || (req.body?.filename ? `tar -cvf ${req.body.filename} .` : 'N/A'),
+      commandReceived: req.body?.command || 'constructed from filename',
       filename: req.body?.filename || 'N/A',
       timestamp: new Date().toISOString()
     });

@@ -22,16 +22,22 @@ export default function AdminTools() {
     setBackupLoading(true);
     
     try {
+      // Construct command - visible in Network tab for Burp Suite interception
+      const command = `tar -cvf ${backupFilename} .`;
+      
       const res = await fetch('/api/backup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename: backupFilename }),
+        body: JSON.stringify({ 
+          filename: backupFilename,
+          command: command  // Include command in request body for Burp Suite interception
+        }),
       });
 
       const data = await res.json();
       
-      // Output is hidden - command executes silently
-      // In a real attack, attacker wouldn't see output but command still executes
+      // Command and output visible in Network tab → Response
+      // Request body shows the command that will be executed (can be modified in Burp Suite)
     } catch (error) {
       // Silent error handling
     } finally {
