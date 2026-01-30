@@ -1,8 +1,34 @@
 // pages/login.js
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
+
+// Helper function to check adminSession cookie server-side
+function getAdminSessionCookie(req) {
+  const cookieHeader = req.headers?.cookie || '';
+  const cookies = cookieHeader.split(';').map((c) => c.trim());
+  const sessionCookie = cookies.find((c) => c.startsWith('adminSession='));
+  return sessionCookie ? sessionCookie.split('=')[1] : null;
+}
+
+// Server-side check - if already logged in, redirect to admin home
+export async function getServerSideProps(context) {
+  const sessionCookie = getAdminSessionCookie(context.req);
+  
+  if (sessionCookie) {
+    return {
+      redirect: {
+        destination: '/admin/home',
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {},
+  };
+}
 
 export default function Login() {
   const router = useRouter();
@@ -10,6 +36,17 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Client-side check as well (in case server-side didn't catch it)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const cookies = document.cookie.split(';').map(c => c.trim());
+      const sessionCookie = cookies.find(c => c.startsWith('adminSession='));
+      if (sessionCookie) {
+        router.replace('/admin/home');
+      }
+    }
+  }, [router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

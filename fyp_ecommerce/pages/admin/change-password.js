@@ -5,10 +5,36 @@
 //  - Relies only on adminSession cookie set on login
 //  - Any third-party site can POST to /api/change-password while the user is logged in
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Navigation from '../../components/Navigation';
 import Footer from '../../components/Footer';
+
+// Helper function to check adminSession cookie
+function getAdminSessionCookie(req) {
+  const cookieHeader = req.headers?.cookie || '';
+  const cookies = cookieHeader.split(';').map((c) => c.trim());
+  const sessionCookie = cookies.find((c) => c.startsWith('adminSession='));
+  return sessionCookie ? sessionCookie.split('=')[1] : null;
+}
+
+// Server-side authentication check
+export async function getServerSideProps(context) {
+  const sessionCookie = getAdminSessionCookie(context.req);
+  
+  if (!sessionCookie) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {},
+  };
+}
 
 export default function ChangePassword() {
   const router = useRouter();
@@ -18,15 +44,6 @@ export default function ChangePassword() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-
-  // Client-side auth guard (same pattern as admin/home)
-  useEffect(() => {
-    const isAuthed =
-      typeof window !== 'undefined' && localStorage.getItem('isAuthenticated') === 'true';
-    if (!isAuthed) {
-      router.replace('/login');
-    }
-  }, [router]);
 
   async function handleSubmit(e) {
     e.preventDefault();

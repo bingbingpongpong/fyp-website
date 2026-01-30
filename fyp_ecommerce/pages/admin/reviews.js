@@ -4,6 +4,32 @@ import { useRouter } from 'next/router';
 import Navigation from '../../components/Navigation';
 import Footer from '../../components/Footer';
 
+// Helper function to check adminSession cookie
+function getAdminSessionCookie(req) {
+  const cookieHeader = req.headers?.cookie || '';
+  const cookies = cookieHeader.split(';').map((c) => c.trim());
+  const sessionCookie = cookies.find((c) => c.startsWith('adminSession='));
+  return sessionCookie ? sessionCookie.split('=')[1] : null;
+}
+
+// Server-side authentication check
+export async function getServerSideProps(context) {
+  const sessionCookie = getAdminSessionCookie(context.req);
+  
+  if (!sessionCookie) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {},
+  };
+}
+
 export default function AdminReviews() {
   const router = useRouter();
   const [reviews, setReviews] = useState([]);
@@ -20,19 +46,8 @@ export default function AdminReviews() {
   const alertShown = useRef({});
   const reloadInitiated = useRef(false);
 
-  // Client-side auth guard - Check adminSession cookie for session hijacking demo
+  // Load reviews on mount (server-side auth already checked)
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    // Check for adminSession cookie (vulnerable to XSS theft)
-    const cookies = document.cookie.split(';').map(c => c.trim());
-    const sessionCookie = cookies.find(c => c.startsWith('adminSession='));
-    
-    if (!sessionCookie) {
-      router.replace('/login');
-      return;
-    }
-    
     fetchAllReviews();
   }, []);
 
@@ -130,6 +145,20 @@ export default function AdminReviews() {
               className="rounded border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
               Back to Admin
+            </button>
+            <button
+              onClick={async () => {
+                try {
+                  await fetch('/api/logout', { method: 'POST' });
+                  router.push('/login');
+                } catch (error) {
+                  console.error('Logout error:', error);
+                  router.push('/login');
+                }
+              }}
+              className="rounded bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+            >
+              Logout
             </button>
             <button
               onClick={fetchAllReviews}
